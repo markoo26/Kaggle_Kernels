@@ -213,9 +213,10 @@ class SklearnHelper(object):
 def get_oof(clf, x_train, y_train, x_test):
     oof_train = np.zeros((ntrain,))
     oof_test = np.zeros((ntest,))
-    oof_test_skf = np.empty((NFOLDS, ntest))
+    oof_test_skf = np.empty((NFOLDS-2, ntest))
 
     for i, (train_index, test_index) in enumerate(kf.split(x_train)): 
+        #print(str(i) + ';' + str(train_index) + ';' + str(test_index)) 
         x_tr = x_train[train_index]
         y_tr = y_train[train_index]
         x_te = x_train[test_index]
@@ -352,7 +353,7 @@ trace = go.Scatter(
         sizeref = 1,
         size = 25,
         color = feature_dataframe['Random Forest feature importances'].values,
-        colorscale='Portland',
+        colorscale='Hot',
         showscale=True
     ),
     text = feature_dataframe['features'].values
@@ -385,7 +386,7 @@ trace = go.Scatter(
         sizeref = 1,
         size = 25,
         color = feature_dataframe['Extra Trees  feature importances'].values,
-        colorscale='Portland',
+        colorscale='Earth',
         showscale=True
     ),
     text = feature_dataframe['features'].values
@@ -417,7 +418,7 @@ trace = go.Scatter(
         sizeref = 1,
         size = 25,
         color = feature_dataframe['AdaBoost feature importances'].values,
-        colorscale='Portland',
+        colorscale='Jet',
         showscale=True
     ),
     text = feature_dataframe['features'].values
@@ -449,7 +450,7 @@ trace = go.Scatter(
         sizeref = 1,
         size = 25,
         color = feature_dataframe['Gradient Boost feature importances'].values,
-        colorscale='Portland',
+        colorscale='Blackbody',
         showscale=True
     ),
     text = feature_dataframe['features'].values
@@ -469,3 +470,49 @@ layout= go.Layout(
 )
 fig4 = go.Figure(data=data, layout=layout)
 plot(fig4)
+
+####!# Obliczanie srednich znaczen poszczegolnych zmiennych ####!#
+
+feature_dataframe['mean'] = feature_dataframe.mean(axis= 1) 
+feature_dataframe = feature_dataframe.sort_values(by = 'mean', axis = 0, ascending = False)
+feature_dataframe.head(3)
+
+####!# Wykres srednich waznosci dla wszystkich modeli ####!#
+
+y = feature_dataframe['mean'].values
+x = feature_dataframe['features'].values
+data = [go.Bar(
+            x= x,
+             y= y,
+            width = 0.5,
+            marker=dict(
+               color = feature_dataframe['mean'].values,
+            colorscale='Portland',
+            showscale=True,
+            reversescale = False
+            ),
+            opacity=0.6
+        )]
+
+layout= go.Layout(
+    autosize= True,
+    title= 'Barplots of Mean Feature Importance',
+    hovermode= 'closest',
+    yaxis=dict(
+        title= 'Feature Importance',
+        ticklen= 5,
+        gridwidth= 2
+    ),
+    showlegend= False
+)
+fig5 = go.Figure(data=data, layout=layout)
+plot(fig5)
+
+####!# Wyciaganie bazowych predykcji w oparciu o startowe modele ####!#
+
+base_predictions_train = pd.DataFrame( {'RandomForest': rf_oof_train.ravel(),
+     'ExtraTrees': et_oof_train.ravel(),
+     'AdaBoost': ada_oof_train.ravel(),
+      'GradientBoost': gb_oof_train.ravel()
+    })
+base_predictions_train.head()

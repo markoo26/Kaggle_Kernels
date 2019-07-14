@@ -54,13 +54,10 @@ from scipy.stats import norm, skew, poisson #### rozklady statystyczne
 
 pd.set_option('display.float_format', lambda x: '{:.3f}'.format(x)) #### format float
 
-##from subprocess import check_output
-##print(check_output(['dir'], shell = True, univeral_newlines=True).decode('utf8')) #check the files available in the directory
-
 ##### Changing working directory #####
 
-#os.chdir('C:\\Users\\Marek\\Desktop\\Python\\Kaggle\\HousePrices')
-os.chdir('C:\\Users\\Marek.Pytka\\Desktop\\Inne szkolenia\\HousePrices')
+os.chdir('C:\\Users\\Marek\\Desktop\\Python\\Kaggle\\HousePrices')
+#os.chdir('C:\\Users\\Marek.Pytka\\Desktop\\Inne szkolenia\\HousePrices')
 
 ##### Import of the data #####
 
@@ -84,8 +81,7 @@ for i in range (1,len(train.columns)+1): ## stworzyc funkcje do tego, generujaca
 ##### Outliers exploration ##### 
     
 fig, ax = plt.subplots()
-
-ax.scatter(x = train['GrLivArea'], y = train['SalePrice'])
+ax.scatter(x = train['LotArea'], y = train['SalePrice'])
 plt.ylabel('SalePrice', fontsize=13)
 plt.xlabel('GrLivArea', fontsize=13)
 plt.show()
@@ -168,8 +164,7 @@ plt.title('Percent missing data by feature', fontsize=15)
 
 corrmat = train.corr()
 plt.subplots(figsize=(12,9))
-sns.heatmap(corrmat, vmax=0.9, square=True)
-dir(corrmat)
+sns.heatmap(corrmat[abs(corrmat)<0.001], vmax=0.9, square=True)
 corrmat.pivot_table
 
 ##### Imputing missing values
