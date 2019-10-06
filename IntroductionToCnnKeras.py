@@ -182,37 +182,31 @@ confusion_mtx = confusion_matrix(Y_true, Y_pred_classes)
 # plot the confusion matrix
 plot_confusion_matrix(confusion_mtx, classes = range(10)) 
 
-##############################################################################
+#### Display errors
 
-plt.imshow(confusion_mtx, interpolation='nearest', cmap=plt.cm.Blues)
-plt.title('Confusion matrix')
-plt.colorbar()
-tick_marks = np.arange(len(range(10)))
-plt.xticks(tick_marks, range(10), rotation=45)
-plt.yticks(tick_marks, range(10))
+errors = (Y_pred_classes - Y_true != 0)
 
-if normalize:
-    cm = confusion_mtx.astype('float') / confusion_mtx.sum(axis=1)[:, np.newaxis]
+Y_pred_classes_errors = Y_pred_classes[errors]
+Y_pred_errors = Y_pred[errors]
+Y_true_errors = Y_true[errors]
+X_val_errors = X_val[errors]
 
-    thresh = cm.max() / 2.
-    for i, j in itertools.product(range(cm.shape[0]), range(cm.shape[1])):
-        plt.text(j, i, cm[i, j],
-                 horizontalalignment="center",
-                 color="white" if cm[i, j] > thresh else "black")
-
-    plt.tight_layout()
-    plt.ylabel('True label')
-    plt.xlabel('Predicted label')
-
-# Predict the values from the validation dataset
-Y_pred = model.predict(X_val)
-# Convert predictions classes to one hot vectors 
-Y_pred_classes = np.argmax(Y_pred,axis = 1) 
-# Convert validation observations to one hot vectors
-Y_true = np.argmax(Y_val,axis = 1) 
-# compute the confusion matrix
-confusion_mtx = confusion_matrix(Y_true, Y_pred_classes) 
-# plot the confusion matrix
-plot_confusion_matrix(confusion_mtx, classes = range(10)) 
-
-##############################################################################
+def display_errors(errors_index,img_errors,pred_errors, obs_errors):
+    """ This function shows 6 images with their predicted and real labels"""
+    n = 0
+    nrows = 2
+    ncols = 3
+    fig, ax = plt.subplots(nrows,ncols,sharex=True,sharey=True)
+    for row in range(nrows):
+        for col in range(ncols):
+            error = errors_index[n]
+            ax[row,col].imshow((img_errors[error]).reshape((28,28)))
+            ax[row,col].set_title("Predicted label :{}\nTrue label :{}".format(pred_errors[error],obs_errors[error]))
+            n += 1
+            
+Y_pred_errors_prob = np.max(Y_pred_errors,axis = 1)
+true_prob_errors = np.diagonal(np.take(Y_pred_errors, Y_true_errors, axis=1))
+delta_pred_true_errors = Y_pred_errors_prob - true_prob_errors
+sorted_dela_errors = np.argsort(delta_pred_true_errors)
+most_important_errors = sorted_dela_errors[-6:]
+display_errors(most_important_errors, X_val_errors, Y_pred_classes_errors, Y_true_errors)
